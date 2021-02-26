@@ -71,9 +71,16 @@ function draw_route(model,lat,long)
     workplaceroute = agent.workplaceroute
     socialroute = agent.socialroute
     distantroute = agent.distantroute
+    j = 0
     while(length(workplaceroute)<10)
         agent = random_agent(model)
         thisroute = agent.workplaceroute
+        j+=1
+        if j >10000
+            agent = random_agent(model)
+            thisroute = agent.workplaceroute
+            break
+        end
     end
     #make array of normal edge colors
     edgecolors = [colorant"black" for i in  1:ne(model.space.graph)]
@@ -84,8 +91,15 @@ function draw_route(model,lat,long)
     #set the home as yellow point in the map
     nodecolors = [colorant"black" for i in  1:ne(model.space.graph)]
     nodecolors[agent.household] = colorant"red"
-    return gplot(model.space.graph, long, lat, edgestrokec=edgecolors, nodefillc=nodecolors)
+    #put emphasis on agent routes by making these bigger
+    edgewidth = [1 for i in 1:ne(model.space.graph)]
+    edgewidth[agent.household] = 3
+
+    return gplot(model.space.graph, long, lat, edgestrokec=edgecolors, nodefillc=nodecolors, edgelinewidth=edgewidth, EDGELINEWIDTH=0.25)
 end
+
+#draw_route(model,lat,long)
+
 
 function create_chart(steps)
     #one step is a week!
@@ -113,8 +127,8 @@ export draw_map,draw_route,create_chart, create_gif
 
 # savefig examples
 #savefig("Graphics\\rostock_example.png")
-# using Compose
+# # using Compose
 # using Plots.PlotMeasures
-#route = draw_initial_map(model,lat,long)
-#draw(PNG("Graphics\\example_route.png",100PlotMeasures.cm,100PlotMeasures.cm),route)
+# route = draw_route(model,lat,long)
+# draw(PNG("Graphics\\example_route.png",100PlotMeasures.cm,100PlotMeasures.cm),route)
 #set_default_graphic_size(100PlotMeasures.cm, 60PlotMeasures.cm)

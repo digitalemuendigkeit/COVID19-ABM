@@ -34,7 +34,7 @@ end
 
 function get_validation_data()
     #get the case data from germany
-    csv_raw = CSV.read("SourceData\\fear_yougov.csv";delim=";")
+    csv_raw = CSV.read("SourceData\\Fear_Data.csv", DataFrame;delim=";")
     DataFrames.rename!(csv_raw,[:x,:y])
     csv_raw.x = [round(parse(Float16,replace(x,","=>"."))) for x in csv_raw.x]
     csv_raw.y = [round(parse(Float16,replace(x,","=>"."))) for x in csv_raw.y]
@@ -51,12 +51,12 @@ function get_validation_data()
     fear_real = fear_yougov.*2.7
 
     #get behavior data
-    csv_raw = CSV.read("SourceData\\Mobility_Data.csv")
+    csv_raw = CSV.read("SourceData\\Mobility_Behavior_Data.csv",DataFrame)
     behavior_real = csv_raw.Value
     behavior_real = behavior_real.*1.4
 
     #get infection data
-    csv_infections = CSV.read("SourceData\\covid19_ECDC.csv")
+    csv_infections = CSV.read("SourceData\\Infection_Data.csv",DataFrame)
     csv_infections = filter(x -> x[Symbol("Country/Region")] == "Germany",csv_infections)
     #get cases from the 14.02., the start date of the model and five more months
     csv_infections = csv_infections.infections[46:200]

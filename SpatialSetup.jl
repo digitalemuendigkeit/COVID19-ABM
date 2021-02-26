@@ -2,12 +2,12 @@ using StatsBase, Distributions, Statistics,Distributed, GraphPlot, GraphRecipes,
 
 function create_node_map()
     #get map data and its inbounds
-    aachen_map = get_map_data(joinpath("SourceData","aachen_test3.osm"), use_cache=false, only_intersections=true)
+    aachen_map = get_map_data(joinpath("SourceData","aachen_bigger.osm"), use_cache=false, only_intersections=true)
     aachen_graph = aachen_map.g
     bounds = aachen_map.bounds
 
     #use the raw parseOSM function to obtain nodes tagged with "school"
-    aachen_schools = OpenStreetMapX.parseOSM(joinpath("SourceData","aachen_test3.osm"))
+    aachen_schools = OpenStreetMapX.parseOSM(joinpath("SourceData","aachen_bigger.osm"))
     aachen_schools_nodes = [key for (key,value) in aachen_schools.features if value[2]=="school"]
     aachen_schools = Dict([key => value for (key,value) in aachen_schools.nodes if in(key,aachen_schools_nodes)])
 
@@ -44,6 +44,8 @@ end
 
 function create_demography_map()
     rawdata = DataFrame!(CSV.File(joinpath("SourceData","zensus.csv")))
+    #a temporary fix to adjust for the updated kaufkraft values
+    [rawdata[i,:kaufkraft] = floor(rawdata[i,:kaufkraft]/6.67) for i in 1:nrow(rawdata)]
     #make sure properties are symboml
     colsymbols = propertynames(rawdata)
     DataFrames.rename!(rawdata,colsymbols)
@@ -54,10 +56,10 @@ end
 function fill_map(model,group,long, lat, correction_factor,schools,schoolrange, workplacedict, social_groups,distant_groups)
     nrow(group) < 4 && return
     #get the bounds and skip if the cell is empty
-    top = maximum(group[:Y])
-    bottom = minimum(group[:Y])
-    left = minimum(group[:X])
-    right = maximum(group[:X])
+    top = maximum(group[!,:Y])
+    bottom = minimum(group[!,:Y])
+    left = minimum(group[!,:X])
+    right = maximum(group[!,:X])
     top-bottom == 0 && right-left == 0 && return
 
     possible_nodes_long = findall(y -> isbetween(left,y,right), long)
@@ -389,6 +391,7 @@ function add_nodes_to_model(model,nodes)
     #so I changed the agent_positions struct to mutable and concatenate an empty array of
     #the length of our new nodes to it
     new_nodes = [Int[] for i in 1:length(nodes)]
+    #now updated to s instead of agent_positions
     model.space.agent_positions = vcat(model.space.agent_positions,new_nodes)
 end
 

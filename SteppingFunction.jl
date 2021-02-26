@@ -9,14 +9,14 @@
     #initialize the timline
     push!(infected_timeline,0)
     push!(infected_timeline_growth,100)
-    attitude, norms = read_message_data()
+    #attitude, norms = read_message_data()
     #create a vector of plots if we want to create a GIF of the spread
     paint_mode && (plot_vector = Vector{Compose.Context}(undef,0))
     add_infected(1,model)
     for step in 1:steps
         for i in 1:7
             model.days_passed+=1
-            send_messages(model.days_passed,attitude,norms)
+            #send_messages(model.days_passed,attitude,norms)
             #select social&distant active groups randomly, more agents are social active on the weekend
             if i < 6
                 social_active_group = rand(social_groups,Int.(round.(length(social_groups)/10)))
@@ -200,16 +200,16 @@ end
         elseif agent.health_status == :S
             #if not, see if the agents route coincides with the pool and see if the agent gets infected by this.
             if time_of_day == :work || time_of_day == :back_work
-                possible_edges = length(filter(x -> in(x,infected_edges),merge(collect(dst.(agent.workplaceroute)),collect(src.(agent.workplaceroute)))))
+                possible_edges = length(filter(x -> in(x,infected_edges),vcat(collect(dst.(agent.workplaceroute)),collect(src.(agent.workplaceroute)))))
             elseif time_of_day == :social || time_of_day == :back_social
-                possible_edges = length(filter(x -> in(x,infected_edges),merge(collect(dst.(agent.socialroute)),collect(src.(agent.socialroute)))))
+                possible_edges = length(filter(x -> in(x,infected_edges),vcat(collect(dst.(agent.socialroute)),collect(src.(agent.socialroute)))))
             end
 
             #if our route coincides with the daily route of others
             if (possible_edges>0)
                 agent.behavior > 60 ? risk = 3.66 : risk = 9.5
                 #use agent wealth as additional factor
-                wealth_modificator = agent.wealth/219
+                wealth_modificator = agent.wealth/208
                 wealth_modificator < 0.01 && (wealth_modificator = 0.01)
                 wealth_modificator > 1.9 && (wealth_modificator = 1.9)
                 #risk increases when agentf
@@ -505,22 +505,22 @@ end
     model_data_to_collect = [(:daily_cases),(:daily_mobility),(:daily_contact),(:days_passed)]
     #run the model - agents go to work, collect data
     time_of_day = :work
-    run!(model, move_step!, 1)
-    run!(model, infect_step!, 1)
+    Agents.run!(model, move_step!, 1)
+    Agents.run!(model, infect_step!, 1)
     #back home
     time_of_day = :back_work
-    run!(model, move_step!,1)
-    run!(model, infect_step!,1)
+    Agents.run!(model, move_step!,1)
+    Agents.run!(model, infect_step!,1)
 
     #if social/distant
     time_of_day = :social
-    run!(model, move_step!,1)
-    run!(model, infect_step!,1)
+    Agents.run!(model, move_step!,1)
+    Agents.run!(model, infect_step!,1)
 
     #and back home - collect data only here at the end of the day
     time_of_day = :back_social
-    run!(model, move_step!,1)
-    data_a, data_m = run!(model, infect_step!,1; adata = data_to_collect,mdata = model_data_to_collect)
+    Agents.run!(model, move_step!,1)
+    data_a, data_m = Agents.run!(model, infect_step!,1; adata = data_to_collect,mdata = model_data_to_collect)
 
     #combine dfs,rename them appropriately and return them
     data_m = select(data_m,Not(:step))
