@@ -58,6 +58,7 @@ addprocs(7)
 @everywhere using StatsBase, Distributions, Statistics,Distributed, GraphPlot, GraphRecipes, AgentsPlots, StatsPlots, Luxor, LightGraphs, OpenStreetMapX
 include("UtilityFunctions.jl")# exports add_infected(number),reset_infected(model)
 include("SteppingFunction.jl")#exports agent_week!
+include("Validation.jl")#provides validation with parallel runs and plotting
 
 #make important data available as well - eval evaluates expression on global scope, everywhere makes it available for all workers, what does $do?
 @everywhere mutable struct DemoAgent <: AbstractAgent

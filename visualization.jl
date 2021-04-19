@@ -93,7 +93,7 @@ function draw_route(model,lat,long)
     nodecolors[agent.household] = colorant"red"
     #put emphasis on agent routes by making these bigger
     edgewidth = [1 for i in 1:ne(model.space.graph)]
-    edgewidth[agent.household] = 3
+    edgewidth[agent.household] = 4
 
     return gplot(model.space.graph, long, lat, edgestrokec=edgecolors, nodefillc=nodecolors, edgelinewidth=edgewidth, EDGELINEWIDTH=0.25)
 end
